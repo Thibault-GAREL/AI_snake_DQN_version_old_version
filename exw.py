@@ -36,7 +36,7 @@ def create(nom_fichier, titre_feuille, nom_en_tete1, nom_en_tete2):
 
 
 # Fonction pour ajouter une donnée et mettre à jour le graphique
-def ajouter_donnee(fichier, ws, wb, x, y, titre_graphe, titre1, titre2):
+def ajouter_donnee(fichier, wb, ws, x, y, titre_graphe, titre1, titre2):
     ws.append([x, y])
 
     # Supprimer les anciens graphiques (évite doublons)
