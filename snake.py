@@ -12,7 +12,7 @@ info = False
 action_dim = 4
 
 
-stop_iteration = 100
+stop_iteration = 1000  # Augmenté de 100 à 1000 pour donner plus de temps à l'agent
 
 @dataclass
 class Snake:
@@ -282,6 +282,10 @@ def distance_food_north_west (my_snake, food):
             distance = ((my_snake.list_snake[0].x - food.x) ** 2 + (my_snake.list_snake[0].y - food.y) ** 2) ** 0.5
     return distance
 
+def distance_euclidienne_to_food(my_snake, food):
+    """Calcule la distance euclidienne entre la tête du snake et la nourriture"""
+    return ((my_snake.list_snake[0].x - food.x) ** 2 + (my_snake.list_snake[0].y - food.y) ** 2) ** 0.5
+
 def print_display(msg, color, position):
     txt = fonttype.render(msg, True, color)
     rect_text = txt.get_rect(**position)
@@ -344,15 +348,19 @@ def game_loop(rect_width, rect_height, display, agent):
         if show:
             display.fill(BLACK)
 
-        state = [distance_bord_north(my_snake), distance_bord_north_est(my_snake),
-                 distance_bord_est(my_snake), distance_bord_south_est(my_snake),
-                 distance_bord_south(my_snake), distance_bord_south_west(my_snake),
-                 distance_bord_west(my_snake), distance_bord_north_west(my_snake),
+        # Normalisation : diviser par la taille max du terrain (800) pour avoir des valeurs entre 0 et 1
+        state = [distance_bord_north(my_snake) / 800, distance_bord_north_est(my_snake) / 800,
+                 distance_bord_est(my_snake) / 800, distance_bord_south_est(my_snake) / 800,
+                 distance_bord_south(my_snake) / 800, distance_bord_south_west(my_snake) / 800,
+                 distance_bord_west(my_snake) / 800, distance_bord_north_west(my_snake) / 800,
 
-                 distance_food_north(my_snake, food_actuel), distance_food_north_est(my_snake, food_actuel),
-                 distance_food_est(my_snake, food_actuel), distance_food_south_est(my_snake, food_actuel),
-                 distance_food_south(my_snake, food_actuel), distance_food_south_west(my_snake, food_actuel),
-                 distance_food_west(my_snake, food_actuel), distance_food_north_west(my_snake, food_actuel)]
+                 distance_food_north(my_snake, food_actuel) / 800, distance_food_north_est(my_snake, food_actuel) / 800,
+                 distance_food_est(my_snake, food_actuel) / 800, distance_food_south_est(my_snake, food_actuel) / 800,
+                 distance_food_south(my_snake, food_actuel) / 800, distance_food_south_west(my_snake, food_actuel) / 800,
+                 distance_food_west(my_snake, food_actuel) / 800, distance_food_north_west(my_snake, food_actuel) / 800]
+
+        # Calculer la distance avant l'action pour le reward shaping
+        distance_avant = distance_euclidienne_to_food(my_snake, food_actuel)
 
         reward = 0
 
@@ -381,11 +389,18 @@ def game_loop(rect_width, rect_height, display, agent):
             my_snake.add_snake(snake_to_add)
             food_actuel = generated_food(my_snake)
             score += 1
-            reward += 1
+            reward += 10  # Récompense importante pour avoir mangé
+        else:
+            # Reward shaping : récompenser si on se rapproche de la nourriture
+            distance_apres = distance_euclidienne_to_food(my_snake, food_actuel)
+            if distance_apres < distance_avant:
+                reward += 0.1  # Petite récompense pour se rapprocher
+            else:
+                reward -= 0.1  # Petite pénalité pour s'éloigner
 
         if my_snake.move() == False:
             done = True
-            reward -= 1
+            reward -= 10  # Pénalité importante pour être mort
 
 
         if show:
@@ -450,15 +465,16 @@ def game_loop(rect_width, rect_height, display, agent):
             print_display(f"Score : {score}", WHITE, {'topleft': (10, 10)})
             # print(f"lenght : {my_snake.lenght}")
 
-        next_state = [distance_bord_north(my_snake), distance_bord_north_est(my_snake),
-             distance_bord_est(my_snake), distance_bord_south_est(my_snake),
-             distance_bord_south(my_snake), distance_bord_south_west(my_snake),
-             distance_bord_west(my_snake), distance_bord_north_west(my_snake),
+        # Normalisation du next_state aussi
+        next_state = [distance_bord_north(my_snake) / 800, distance_bord_north_est(my_snake) / 800,
+             distance_bord_est(my_snake) / 800, distance_bord_south_est(my_snake) / 800,
+             distance_bord_south(my_snake) / 800, distance_bord_south_west(my_snake) / 800,
+             distance_bord_west(my_snake) / 800, distance_bord_north_west(my_snake) / 800,
 
-             distance_food_north(my_snake, food_actuel), distance_food_north_est(my_snake, food_actuel),
-             distance_food_est(my_snake, food_actuel), distance_food_south_est(my_snake, food_actuel),
-             distance_food_south(my_snake, food_actuel), distance_food_south_west(my_snake, food_actuel),
-             distance_food_west(my_snake, food_actuel), distance_food_north_west(my_snake, food_actuel)]
+             distance_food_north(my_snake, food_actuel) / 800, distance_food_north_est(my_snake, food_actuel) / 800,
+             distance_food_est(my_snake, food_actuel) / 800, distance_food_south_est(my_snake, food_actuel) / 800,
+             distance_food_south(my_snake, food_actuel) / 800, distance_food_south_west(my_snake, food_actuel) / 800,
+             distance_food_west(my_snake, food_actuel) / 800, distance_food_north_west(my_snake, food_actuel) / 800]
 
 
 

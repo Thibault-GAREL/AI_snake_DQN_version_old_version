@@ -49,10 +49,13 @@ for episode in progressbar.progressbar(range(snake.ia.nb_loop_train)):
     #
     #     state = next_state
 
-    # Mise à jour du réseau cible toutes les N itérations
+    # Mise à jour du réseau cible toutes les 10 itérations (au lieu de tous les modulo)
+    if episode % 10 == 0 and episode != 0:
+        agent.update_target()
+
+    # Sauvegarde et logging tous les modulo épisodes
     if episode % modulo == 0 and episode != 0:
         score_mean.append(score_temp/modulo)
-        agent.update_target()
 
         exw.ajouter_donnee(fichier, wb, ws, episode, score_temp/modulo, "Graphe de l'évolution des scores", "Episode", "Score")
 

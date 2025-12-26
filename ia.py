@@ -17,15 +17,19 @@ nb_loop_train += 1
 class QNetwork(nn.Module):
     def __init__(self, state_dim, action_dim):
         super(QNetwork, self).__init__()
-        # Réseau tout simple : état -> couches cachées -> valeurs Q
-        self.fc1 = nn.Linear(state_dim,32)
-        self.fc2 = nn.Linear(32, action_dim)
+        # Réseau plus profond : état -> couches cachées -> valeurs Q
+        self.fc1 = nn.Linear(state_dim, 128)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, 64)
+        self.fc4 = nn.Linear(64, action_dim)
 
 
     def forward(self, x):
         # Passage avant (calcul des Q-values)
         x = torch.relu(self.fc1(x))
-        return self.fc2(x)
+        x = torch.relu(self.fc2(x))
+        x = torch.relu(self.fc3(x))
+        return self.fc4(x)
 
     # def __init__(self, state_dim, action_dim):
     #     super(QNetwork, self).__init__()
@@ -65,7 +69,7 @@ class DQNAgent:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.q_net = QNetwork(state_dim, action_dim).to(self.device)
         self.target_net = QNetwork(state_dim, action_dim).to(self.device)
-        self.optimizer = optim.Adam(self.q_net.parameters(), lr=1e-2)
+        self.optimizer = optim.Adam(self.q_net.parameters(), lr=1e-3)  # Réduit de 1e-2 à 1e-3
 
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='min', factor=0.5, patience=10000, min_lr=1e-5)
 
@@ -74,8 +78,8 @@ class DQNAgent:
 
         self.gamma = 0.99       # facteur de discount
         self.epsilon = 1.0      # exploration initiale
-        self.epsilon_decay = 0.995
-        self.epsilon_min = 0.1
+        self.epsilon_decay = 0.999  # Ajusté de 0.995 à 0.999 pour une décroissance plus lente
+        self.epsilon_min = 0.01     # Réduit de 0.1 à 0.01 pour plus d'exploitation
 
         self.replay_buffer = ReplayBuffer(10000)
 
