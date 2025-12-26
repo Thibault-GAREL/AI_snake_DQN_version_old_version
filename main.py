@@ -35,7 +35,7 @@ try:
 
         score_temp += snake.game_loop(snake.rect_width, snake.rect_height, snake.display, agent)
         # print(f'longeur du buffer : {len(agent.replay_buffer.buffer)}')
-        agent.train_step(batch_size=64)
+        agent.train_step(batch_size=128)  # AUGMENTÉ : Batch size plus grand (64 → 128)
 
 
         # while not done:
