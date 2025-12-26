@@ -145,12 +145,18 @@ class DQNAgent:
     def load_model(self, filepath):
         """Charge un modèle sauvegardé"""
         if os.path.exists(filepath):
-            checkpoint = torch.load(filepath)
-            self.q_net.load_state_dict(checkpoint['q_net_state_dict'])
-            self.target_net.load_state_dict(checkpoint['target_net_state_dict'])
-            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            self.epsilon = checkpoint['epsilon']
-            print(f"Modèle chargé depuis {filepath}")
+            try:
+                checkpoint = torch.load(filepath)
+                self.q_net.load_state_dict(checkpoint['q_net_state_dict'])
+                self.target_net.load_state_dict(checkpoint['target_net_state_dict'])
+                self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+                self.epsilon = checkpoint['epsilon']
+                print(f"Modèle chargé depuis {filepath}")
+            except RuntimeError as e:
+                print(f"⚠️  Impossible de charger le modèle : architecture incompatible")
+                print(f"L'ancien modèle a une architecture différente de la nouvelle.")
+                print(f"L'entraînement va recommencer depuis zéro.")
+                print(f"Détails de l'erreur : {e}")
         else:
             print(f"Fichier {filepath} non trouvé")
 
