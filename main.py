@@ -17,9 +17,9 @@ score_temp = 0
 modulo = (snake.ia.nb_loop_train-1) // 100  # Pour le logging graphique
 save_interval = 100  # Sauvegarder tous les 100 épisodes
 
-fichier, wb, ws = exw.create("donnees2", "entrainement" + str(executions), "X", "Y")
+fichier, wb, ws = exw.create("donnees3", "entrainement" + str(executions), "X", "Y")
 
-model_name = "models3" # "models" + str(executions)
+model_name = "models4" # "models" + str(executions)
 
 if snake.ia.os.path.exists(model_name + "/snake_dqn_model.pth"):
     agent.load_model(model_name + "/snake_dqn_model.pth")

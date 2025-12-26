@@ -10,7 +10,7 @@ import os
 
 input_dim = 16 #state dim : 8 bords, 8 foods
 
-nb_loop_train = 60 * 6000 # 6000 = 1 min
+nb_loop_train = 1000 # 6000 = 1 min
 
 nb_loop_train += 1
 
