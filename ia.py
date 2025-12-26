@@ -81,7 +81,7 @@ class DQNAgent:
         self.epsilon_decay = 0.999  # Ajusté de 0.995 à 0.999 pour une décroissance plus lente
         self.epsilon_min = 0.01     # Réduit de 0.1 à 0.01 pour plus d'exploitation
 
-        self.replay_buffer = ReplayBuffer(10000)
+        self.replay_buffer = ReplayBuffer(50000)  # AUGMENTÉ : Plus de mémoire (10k → 50k)
 
     def select_action(self, state, action_dim):
         # Choix epsilon-greedy
