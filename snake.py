@@ -384,26 +384,31 @@ def game_loop(rect_width, rect_height, display, agent):
             my_snake.direction = "LEFT"
             my_snake.moved = False
 
+        # FIX CRITIQUE: BOUGER LE SNAKE D'ABORD, PUIS CALCULER LES RÉCOMPENSES
+        # Sauvegarder si le mouvement réussit
+        move_successful = my_snake.move()
+
         # Pénalité par pas de temps pour encourager à manger rapidement
         reward -= 1
 
-        if my_snake.list_snake[0].x == food_actuel.x and my_snake.list_snake[0].y == food_actuel.y:
+        # MAINTENANT vérifier si mort (après le mouvement)
+        if not move_successful:
+            done = True
+            reward -= 100  # Pénalité importante pour être mort
+        # MAINTENANT vérifier si a mangé (après le mouvement)
+        elif my_snake.list_snake[0].x == food_actuel.x and my_snake.list_snake[0].y == food_actuel.y:
             snake_to_add = Snake(my_snake.list_snake[-1].x, my_snake.list_snake[-1].y)
             my_snake.add_snake(snake_to_add)
             food_actuel = generated_food(my_snake)
             score += 1
-            reward += 100  # AUGMENTÉ : Récompense importante pour avoir mangé (10 → 100)
+            reward += 100  # Récompense importante pour avoir mangé
         else:
-            # Reward shaping : récompenser si on se rapproche de la nourriture
+            # Reward shaping : récompenser si on se rapproche de la nourriture (après le mouvement)
             distance_apres = distance_euclidienne_to_food(my_snake, food_actuel)
             if distance_apres < distance_avant:
-                reward += 2.0  # AUGMENTÉ : Récompense pour se rapprocher (0.1 → 1.0)
+                reward += 2.0  # Récompense pour se rapprocher
             else:
-                reward -= 2.0  # AUGMENTÉ : Pénalité pour s'éloigner (0.1 → 1.0)
-
-        if my_snake.move() == False:
-            done = True
-            reward -= 100  # AUGMENTÉ : Pénalité importante pour être mort (10 → 100)
+                reward -= 2.0  # Pénalité pour s'éloigner
 
 
         if show:
