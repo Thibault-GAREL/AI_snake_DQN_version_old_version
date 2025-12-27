@@ -385,7 +385,7 @@ def game_loop(rect_width, rect_height, display, agent):
             my_snake.moved = False
 
         # Pénalité par pas de temps pour encourager à manger rapidement
-        reward -= 0.01
+        reward -= 1
 
         if my_snake.list_snake[0].x == food_actuel.x and my_snake.list_snake[0].y == food_actuel.y:
             snake_to_add = Snake(my_snake.list_snake[-1].x, my_snake.list_snake[-1].y)
@@ -397,9 +397,9 @@ def game_loop(rect_width, rect_height, display, agent):
             # Reward shaping : récompenser si on se rapproche de la nourriture
             distance_apres = distance_euclidienne_to_food(my_snake, food_actuel)
             if distance_apres < distance_avant:
-                reward += 1.0  # AUGMENTÉ : Récompense pour se rapprocher (0.1 → 1.0)
+                reward += 2.0  # AUGMENTÉ : Récompense pour se rapprocher (0.1 → 1.0)
             else:
-                reward -= 1.0  # AUGMENTÉ : Pénalité pour s'éloigner (0.1 → 1.0)
+                reward -= 2.0  # AUGMENTÉ : Pénalité pour s'éloigner (0.1 → 1.0)
 
         if my_snake.move() == False:
             done = True
