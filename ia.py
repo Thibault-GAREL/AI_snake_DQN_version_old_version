@@ -10,7 +10,7 @@ import os
 
 input_dim = 16 #state dim : 8 bords, 8 foods
 
-nb_loop_train = 500000 # 6000 = 1 min
+nb_loop_train = 100000 # 6000 = 1 min
 
 nb_loop_train += 1
 
@@ -76,7 +76,7 @@ class DQNAgent:
         # Copie initiale du réseau vers le target network
         self.target_net.load_state_dict(self.q_net.state_dict())
 
-        self.gamma = 0.99       # facteur de discount
+            self.gamma = 0.99       # facteur de discount
         self.epsilon = 1.0      # exploration initiale
         self.epsilon_decay = 0.999  # Ajusté de 0.995 à 0.999 pour une décroissance plus lente
         self.epsilon_min = 0.01     # Réduit de 0.1 à 0.01 pour plus d'exploitation

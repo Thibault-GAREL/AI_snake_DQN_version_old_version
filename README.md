@@ -9,12 +9,15 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)  
 ![Contributions](https://img.shields.io/badge/contributions-welcome-orange.svg)  
 
-## 📝 Project Description 
+## 📝 Project Description - Old Version
 This project showcases an AI that learns to play [my snake game](https://github.com/Thibault-GAREL/snake_game) using the deep Q-learning algorithm. No hardcoded strategy — the agent improves by trial, error, and reward-based learning. 🧠📈
 
-Attention ! 🚧 **This project is still in progress** 🚧  
-🎛️ **Hyperparameters** (learning rate, epsilon decay, reward shaping) have a **huge impact** on learning performance.  
+Attention ! 🚧 **This project is the old version** 🚧  
+- 🎛️ **Hyperparameters** (learning rate, epsilon decay, reward shaping) have a **huge impact** on learning performance.  
 - **Problem** 😵‍💫 : I can find good hyperparameter ! Maybe, it is something else 😥.
+
+**Here is the new version that works :**
+- [AI Snake - DQL - New Version](https://github.com/Thibault-GAREL/snake_game)
 
 ---
 
