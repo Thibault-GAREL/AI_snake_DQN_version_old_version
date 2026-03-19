@@ -17,7 +17,7 @@ Attention ! 🚧 **This project is the old version** 🚧
 - **Problem** 😵‍💫 : I can find good hyperparameter ! Maybe, it is something else 😥.
 
 **Here is the new version that works :**
-- [AI Snake - DQL - New Version](https://github.com/Thibault-GAREL/snake_game)
+- [AI Snake - DQL - New Version](https://github.com/Thibault-GAREL/AI_snake_DQN_version)
 
 ---
 
