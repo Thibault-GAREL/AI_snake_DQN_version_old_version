@@ -7,24 +7,36 @@ from pathlib import Path
 def create(nom_fichier, titre_feuille, nom_en_tete1, nom_en_tete2):
     fichier = nom_fichier + ".xlsx" # "donnees.xlsx"
 
-    # Création ou ouverture du fichier
-    if Path(fichier).exists():
-        wb = load_workbook(fichier)
-    else:
-        wb = Workbook()
+    # Essayer de trouver un nom de fichier disponible si le fichier est verrouillé
+    counter = 0
+    original_fichier = fichier
+    while True:
+        try:
+            # Création ou ouverture du fichier
+            if Path(fichier).exists():
+                wb = load_workbook(fichier)
+            else:
+                wb = Workbook()
 
-    # Vérifier si la feuille existe déjà
-    if titre_feuille in wb.sheetnames:
-        ws = wb[titre_feuille]
-    else:
-        ws = wb.create_sheet(title=titre_feuille)
-        ws.append([nom_en_tete1, nom_en_tete2])  # En-têtes
+            # Vérifier si la feuille existe déjà
+            if titre_feuille in wb.sheetnames:
+                ws = wb[titre_feuille]
+            else:
+                ws = wb.create_sheet(title=titre_feuille)
+                ws.append([nom_en_tete1, nom_en_tete2])  # En-têtes
 
-    return fichier, ws, wb
+            return fichier, wb, ws
+        except PermissionError:
+            counter += 1
+            fichier = nom_fichier + f"_alt{counter}.xlsx"
+            if counter > 10:  # Éviter boucle infinie
+                print(f"⚠️ Impossible d'ouvrir {original_fichier} ou ses alternatives.")
+                print("Veuillez fermer le fichier Excel et relancer le programme.")
+                raise
 
 
 # Fonction pour ajouter une donnée et mettre à jour le graphique
-def ajouter_donnee(fichier, ws, wb, x, y, titre_graphe, titre1, titre2):
+def ajouter_donnee(fichier, wb, ws, x, y, titre_graphe, titre1, titre2):
     ws.append([x, y])
 
     # Supprimer les anciens graphiques (évite doublons)
@@ -50,7 +62,13 @@ def ajouter_donnee(fichier, ws, wb, x, y, titre_graphe, titre1, titre2):
     # Position du graphique dans la feuille
     ws.add_chart(chart, "E5")
 
-    # Sauvegarde du fichier
-    wb.save(fichier)
+    # Sauvegarde du fichier avec gestion d'erreur
+    try:
+        wb.save(fichier)
+    except PermissionError:
+        print(f"\n⚠️  Impossible de sauvegarder {fichier}")
+        print(f"Le fichier est probablement ouvert dans Excel.")
+        print(f"Les données sont toujours en mémoire, mais ne seront pas sauvegardées.")
+        print(f"Fermez le fichier Excel pour que les prochaines sauvegardes fonctionnent.\n")
 
 

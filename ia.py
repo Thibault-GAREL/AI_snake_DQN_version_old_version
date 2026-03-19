@@ -10,22 +10,26 @@ import os
 
 input_dim = 16 #state dim : 8 bords, 8 foods
 
-nb_loop_train = 60 * 6000 # 6000 = 1 min
+nb_loop_train = 100000 # 6000 = 1 min
 
 nb_loop_train += 1
 
 class QNetwork(nn.Module):
     def __init__(self, state_dim, action_dim):
         super(QNetwork, self).__init__()
-        # Réseau tout simple : état -> couches cachées -> valeurs Q
-        self.fc1 = nn.Linear(state_dim,32)
-        self.fc2 = nn.Linear(32, action_dim)
+        # Réseau plus profond : état -> couches cachées -> valeurs Q
+        self.fc1 = nn.Linear(state_dim, 128)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, 64)
+        self.fc4 = nn.Linear(64, action_dim)
 
 
     def forward(self, x):
         # Passage avant (calcul des Q-values)
         x = torch.relu(self.fc1(x))
-        return self.fc2(x)
+        x = torch.relu(self.fc2(x))
+        x = torch.relu(self.fc3(x))
+        return self.fc4(x)
 
     # def __init__(self, state_dim, action_dim):
     #     super(QNetwork, self).__init__()
@@ -65,19 +69,19 @@ class DQNAgent:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.q_net = QNetwork(state_dim, action_dim).to(self.device)
         self.target_net = QNetwork(state_dim, action_dim).to(self.device)
-        self.optimizer = optim.Adam(self.q_net.parameters(), lr=1e-2)
+        self.optimizer = optim.Adam(self.q_net.parameters(), lr=1e-3)  # Réduit de 1e-2 à 1e-3
 
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='min', factor=0.5, patience=10000, min_lr=1e-5)
 
         # Copie initiale du réseau vers le target network
         self.target_net.load_state_dict(self.q_net.state_dict())
 
-        self.gamma = 0.99       # facteur de discount
+            self.gamma = 0.99       # facteur de discount
         self.epsilon = 1.0      # exploration initiale
-        self.epsilon_decay = 0.995
-        self.epsilon_min = 0.1
+        self.epsilon_decay = 0.999  # Ajusté de 0.995 à 0.999 pour une décroissance plus lente
+        self.epsilon_min = 0.01     # Réduit de 0.1 à 0.01 pour plus d'exploitation
 
-        self.replay_buffer = ReplayBuffer(10000)
+        self.replay_buffer = ReplayBuffer(100000)  # AUGMENTÉ : Plus de mémoire (10k → 50k)
 
     def select_action(self, state, action_dim):
         # Choix epsilon-greedy
@@ -141,12 +145,18 @@ class DQNAgent:
     def load_model(self, filepath):
         """Charge un modèle sauvegardé"""
         if os.path.exists(filepath):
-            checkpoint = torch.load(filepath)
-            self.q_net.load_state_dict(checkpoint['q_net_state_dict'])
-            self.target_net.load_state_dict(checkpoint['target_net_state_dict'])
-            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            self.epsilon = checkpoint['epsilon']
-            print(f"Modèle chargé depuis {filepath}")
+            try:
+                checkpoint = torch.load(filepath)
+                self.q_net.load_state_dict(checkpoint['q_net_state_dict'])
+                self.target_net.load_state_dict(checkpoint['target_net_state_dict'])
+                self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+                self.epsilon = checkpoint['epsilon']
+                print(f"Modèle chargé depuis {filepath}")
+            except RuntimeError as e:
+                print(f"⚠️  Impossible de charger le modèle : architecture incompatible")
+                print(f"L'ancien modèle a une architecture différente de la nouvelle.")
+                print(f"L'entraînement va recommencer depuis zéro.")
+                print(f"Détails de l'erreur : {e}")
         else:
             print(f"Fichier {filepath} non trouvé")
 
